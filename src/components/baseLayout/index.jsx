@@ -7,8 +7,20 @@ import {
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import {
+	BrowserRouter as Router,
+	Switch,
+	Route,
+	Redirect,
+	useLocation,
+  useHistory,
+  withRouter
+} from "react-router-dom";
+import routerData from 'router/index'
+import Sider from './sider'
+import admin_logo from 'assets/admin_logo.jpg';
 import './index.less';
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Footer,  } = Layout;
 const { SubMenu } = Menu;
 class baseLayout extends React.Component {
   state = {
@@ -18,49 +30,48 @@ class baseLayout extends React.Component {
     console.log(collapsed);
     this.setState({ collapsed });
   };
+  // onGoPage = ({ item, key, keyPath, domEvent }) => {
+  //   console.log('item',item)
+  //   console.log('key',key)
+  //   console.log('keyPath',keyPath)
+  //   console.log('domEvent',domEvent)
+  // }
+  onGoPage = (route) => {
+    const { history } = this.props;
+		history.push({
+			path: route.path
+		})
+  }
   render(){
     const { collapsed } = this.state;
+    console.log('routerData',routerData)
     return (
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
-          <div className={collapsed ? 'logo logo_collapsed' : 'logo'}>
-              <img class="logo_img" src="@/assets/admin_logo.jpg" alt=""/>
-              {!collapsed ? <div class="text" >My Antd of Vue</div> : null}
-          </div>
-          <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-            <Menu.Item key="1" icon={<PieChartOutlined />}>
-              Option 1
-            </Menu.Item>
-            <Menu.Item key="2" icon={<DesktopOutlined />}>
-              Option 2
-            </Menu.Item>
-            <SubMenu key="sub1" icon={<UserOutlined />} title="User">
-              <Menu.Item key="3">Tom</Menu.Item>
-              <Menu.Item key="4">Bill</Menu.Item>
-              <Menu.Item key="5">Alex</Menu.Item>
-            </SubMenu>
-            <SubMenu key="sub2" icon={<TeamOutlined />} title="Team">
-              <Menu.Item key="6">Team 1</Menu.Item>
-              <Menu.Item key="8">Team 2</Menu.Item>
-            </SubMenu>
-            <Menu.Item key="9" icon={<FileOutlined />}>
-              Files
-            </Menu.Item>
-          </Menu>
-        </Sider>
+        <Router>
+        <Sider/>
         <Layout className="site-layout">
           <Header className="site-layout-background" style={{ padding: 0 }} />
           <Content style={{ margin: '0 16px' }}>
-            <Breadcrumb style={{ margin: '16px 0' }}>
+          
+            <Switch >
+              { routerData.map(route => (
+                <Route  path={route.path} component={route.components} />
+              )) }
+             
+              <Route exact path="*" render={() => ( <div>未匹配任何</div> )} />
+            </Switch>
+          
+            {/* <Breadcrumb style={{ margin: '16px 0' }}>
               <Breadcrumb.Item>User</Breadcrumb.Item>
               <Breadcrumb.Item>Bill</Breadcrumb.Item>
             </Breadcrumb>
             <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
               Bill is a cat.
-            </div>
+            </div> */}
           </Content>
           <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
         </Layout>
+        </Router>
       </Layout>
     )
   }
