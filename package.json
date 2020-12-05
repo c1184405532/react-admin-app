@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "4.8.4": "^1.0.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "antd": "^4.8.2",
+    "antd": "^4.8.4",
     "dotenv": "^8.2.0",
     "less": "^3.12.2",
     "less-loader": "^7.1.0",

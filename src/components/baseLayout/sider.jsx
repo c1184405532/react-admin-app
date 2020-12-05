@@ -1,29 +1,19 @@
 import React from 'react';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu,Tooltip, Drawer } from 'antd';
 import {
-  DesktopOutlined,
   PieChartOutlined,
-  FileOutlined,
-  TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import {
-
   withRouter
 } from "react-router-dom";
 import routerData from 'router/index'
 import admin_logo from 'assets/admin_logo.jpg';
 import './index.less';
-const { Header, Content, Footer, Sider } = Layout;
+const { Sider } = Layout;
 const { SubMenu } = Menu;
 class AgainSider extends React.Component {
-  state = {
-    collapsed: false,
-  };
-  onCollapse = collapsed => {
-    console.log(collapsed);
-    this.setState({ collapsed });
-  };
+  
   // onGoPage = ({ item, key, keyPath, domEvent }) => {
   //   console.log('item',item)
   //   console.log('key',key)
@@ -31,47 +21,94 @@ class AgainSider extends React.Component {
   //   console.log('domEvent',domEvent)
   // }
   onGoPage = (route) => {
-    const { history } = this.props;
+    const { history,isMobile,onCollapse } = this.props;
 		history.push({
 			pathname: route.path
-		})
+    })
+    if(isMobile){
+      onCollapse(false)
+    }
+  }
+  renderSider = (routerData) => {
+    return routerData.map( route => {
+      const { children = [] } = route;
+      if(children.length > 0){
+        return <SubMenu key={route.name} icon={<UserOutlined />} title="User">
+                {this.renderSider(children)}
+              </SubMenu> 
+      }
+      const { isTooltip = false,title } = route.meta
+      return <Menu.Item 
+              onClick={()=>{this.onGoPage(route)}} 
+              key={route.name} 
+              icon={<PieChartOutlined />}
+            >
+              { isTooltip ? 
+                <Tooltip title={title} children={ <span>{title}</span> }/> 
+                :
+                <span>{title}</span>
+              }
+          </Menu.Item>
+    })
   }
   render(){
-    const { collapsed } = this.state;
-    console.log('routerData',routerData)
+    const { isMobile,collapsed,onCollapse } = this.props
     return (
-
-        <Sider 
-          collapsible 
-          theme="light"
-          collapsed={collapsed} 
-          onCollapse={this.onCollapse}
-        >
-          <div className={collapsed ? 'logo logo_collapsed' : 'logo'}>
-              <img className="logo_img" src={admin_logo} alt=""/>
-              {!collapsed ? <div className="text" >My Antd of Vue</div> : null}
-          </div>
-          <Menu 
-            theme="light" 
-            defaultSelectedKeys={['1']} 
-            mode="inline"
-            //onClick={this.onGoPage}
-          >
-            { routerData.map( route =>(
-              <Menu.Item onClick={()=>{this.onGoPage(route)}} key={route.name} icon={<PieChartOutlined />}>
-                {route.meta.title}
-              </Menu.Item>
-             )) }
-            
-            {/* <SubMenu key="sub1" icon={<UserOutlined />} title="User">
-              <Menu.Item key="3">Tom</Menu.Item>
-              <Menu.Item key="4">Bill</Menu.Item>
-              <Menu.Item key="5">Alex</Menu.Item>
-            </SubMenu> */}
-            
-          </Menu>
-        </Sider>
-       
+          isMobile ? 
+            <Drawer
+              title={
+                <div className={'logo'}>
+                  <img className="logo_img" src={admin_logo} alt=""/>
+                  <div className="text" >My Antd </div>
+                </div>
+              }
+              headerStyle={{padding:0}}
+              bodyStyle={{padding:0}}
+              width={200}
+              placement="left"
+              closable={false}
+              onClose={()=>{onCollapse(!collapsed)}}
+              visible={collapsed}
+              key="left"
+            >
+              <Sider 
+                collapsible 
+                className="base-layout-sider-box"
+                theme="light"
+                collapsed={!collapsed} 
+                trigger={null}
+              >
+                <Menu 
+                  theme="light" 
+                  defaultSelectedKeys={['1']} 
+                  mode="inline"
+                  //onClick={this.onGoPage}
+                >
+                  {this.renderSider(routerData.content)}        
+                </Menu>
+              </Sider>
+            </Drawer>
+            :
+            <Sider 
+              className="base-layout-sider-box"
+              collapsible 
+              theme="light"
+              collapsed={!collapsed} 
+              onCollapse={()=>{onCollapse(!collapsed)}}
+            >
+              <div className={!collapsed ? 'logo logo_collapsed' : 'logo'}>
+                <img className="logo_img" src={admin_logo} alt=""/>
+                {collapsed ? <div className="text" >My Antd </div> : null}
+              </div>
+              <Menu 
+                theme="light" 
+                defaultSelectedKeys={['1']} 
+                mode="inline"
+                //onClick={this.onGoPage}
+              >
+                {this.renderSider(routerData.content)}        
+              </Menu>
+            </Sider>
     )
   }
 }
