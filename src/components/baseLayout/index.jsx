@@ -22,7 +22,6 @@ class BaseLayout extends React.Component {
     clearTimeout(timeOut)
     timeOut = setTimeout(() => {
       const clientWidth =  document.body.clientWidth;
-      console.log(clientWidth)
       if(clientWidth <= 768){
         this.setState({isMobile:true})
       }else{
