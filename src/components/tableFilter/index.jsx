@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Input, Button, Select } from 'antd';
+import { Form, Input, Button, Select, DatePicker } from 'antd';
+import moment from 'moment';
 import './index.less';
 /**
  * columns type Array[object,object,...]
@@ -18,7 +19,15 @@ import './index.less';
  *  }
  * }
  */
-
+const setInitialValue = (value, type) => {
+  const valueType = {
+    "input": value,
+    "select": value ? value : undefined,//select下如果默认值不存在的话，不能赋值为''，否则不显示placeHolder
+    "datePicker": value ? moment(value, 'YYYY-MM-DD') : '',
+    "datePickerMonth": value ? moment(value, 'YYYY-MM') : '',
+  }
+  return valueType[type]
+}
 class TableFilter extends React.Component {
   static defaultProps = {
     columns: []
@@ -32,10 +41,19 @@ class TableFilter extends React.Component {
     //this.formRef.submit();
   }
   onFinish = (values) => {
-    for(let obj in values){
-      values[obj] = values[obj] ? values[obj] : ''
+    const { columns } = this.props
+    for (let obj in values) {
+      values[obj] = values[obj] ? values[obj] : '';
+      columns.forEach(col => {
+        if (obj === col['name'] && col.type === 'datePicker') {
+          values[obj] = values[obj] ? values[obj].format('YYYY-MM-DD') : ''
+        }
+        if (obj === col['name'] && col.type === 'datePickerMonth') {
+          values[obj] = values[obj] ? values[obj].format('YYYY-MM') : ''
+        }
+      })
     }
-    console.log(values)
+    console.log(values, moment)
   }
   onSearch = () => {
     this.formRef.submit();
@@ -48,25 +66,29 @@ class TableFilter extends React.Component {
         value: col.initialValue
       }
     })
+    console.log(fieldsData)
+    return
     this.formRef.setFields([...fieldsData]);
   }
   renderCol = (col) => {
     const {
       className = '', label, name, rules = [{ required: false }],
-      placeHolder, initialValue = '', type = 'input',selectOptions = [],
+      placeHolder, initialValue = '', type = 'input', selectOptions = [],
+      
     } = col;
+
     const itemOption = {
       ...col,
       rules,
       className: className + ' row-list',
       key: name,
-      initialValue:type === 'select' ? initialValue ? initialValue : undefined : initialValue,//select下如果默认值不存在的话，不能赋值为''，否则不显示placeHolder
+      initialValue: setInitialValue(initialValue, type),
     }
 
     //这里删除的属性都是Form.Item不需要的或者不识别的属性
     delete itemOption.placeHolder
     delete itemOption.selectOptions
-
+    delete itemOption.pickerType
     let resultCol;
     if (type === 'input') {
       resultCol = <Form.Item
@@ -75,7 +97,7 @@ class TableFilter extends React.Component {
         <Input placeholder={placeHolder || "请输入" + label} />
       </Form.Item>
     }
-    if(type === 'select'){
+    if (type === 'select') {
       resultCol = <Form.Item
         {...itemOption}
       >
@@ -86,6 +108,21 @@ class TableFilter extends React.Component {
         </Select>
       </Form.Item>
     }
+    if (type === 'datePicker') {
+      resultCol = <Form.Item
+        {...itemOption}
+      >
+        <DatePicker  />
+      </Form.Item>
+    }
+    if (type === 'datePickerMonth') {
+      resultCol = <Form.Item
+        {...itemOption}
+      >
+        <DatePicker picker="month" />
+      </Form.Item>
+    }
+    
     return resultCol
   }
   render() {

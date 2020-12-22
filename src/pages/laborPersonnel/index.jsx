@@ -11,12 +11,14 @@ class LaborPersonnel extends React.Component {
   
   render(){
     const filterColumns = [
-      {label:'劳务人员姓名',name:'laborName',type:'input'},
+      {label:'姓名',name:'laborName',type:'input'},
       {label:'劳务人员编号',name:'laborCode',type:'input',},
       {
         label:'劳务人员班组',name:'laborGroups',type:'select',initialValue:'id123456',
         selectOptions:[{label:'一组',value:'id12345'},{label:'二组',value:'id123456'},]
       },
+      {label:'入职日期',name:'entryDate',type:'datePicker',initialValue:'2020-12-11'},
+      {label:'离职日期',name:'lizhiDate',type:'datePickerMonth',initialValue:'2021-11'},
       //{label:'劳务人员编号',name:'laborCodes',type:'input',placeHolder:'请输入'},
       //{label:'劳务人员编号',name:'laborCodess',type:'input',placeHolder:'请输入'},
       //{label:'劳务人员编号',name:'laborCodesss',type:'input',placeHolder:'请输入'},
