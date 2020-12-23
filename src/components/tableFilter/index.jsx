@@ -28,6 +28,17 @@ const setInitialValue = (value, type) => {
   }
   return valueType[type]
 }
+const setFinishValue = (value, type) => {
+  //moment格式化参数文档详见： http://momentjs.cn/docs/#/displaying/format/
+  const valueType = {
+    "datePicker": value ? value.format('YYYY-MM-DD'): '',
+    "datePickerMonth": value ? value.format('YYYY-MM') : '',
+    "datePickerYear": value ? value.format('YYYY') : '',
+    "datePickerWeek": value ? value.format('YYYY-wo') : '',
+    "datePickerQuarter": value ? value.format("YYYY-[Q]Q") : '',
+  }
+  return valueType[type]
+}
 class TableFilter extends React.Component {
   static defaultProps = {
     columns: []
@@ -45,15 +56,15 @@ class TableFilter extends React.Component {
     for (let obj in values) {
       values[obj] = values[obj] ? values[obj] : '';
       columns.forEach(col => {
-        if (obj === col['name'] && col.type === 'datePicker') {
-          values[obj] = values[obj] ? values[obj].format('YYYY-MM-DD') : ''
+        //只要类型前10位 === datePicker都会进入此判断 比如datePicker||datePickerMonth
+        if (obj === col['name'] && col.type.slice(0,10) === 'datePicker') {
+          values[obj] = setFinishValue(values[obj],col.type) 
         }
-        if (obj === col['name'] && col.type === 'datePickerMonth') {
-          values[obj] = values[obj] ? values[obj].format('YYYY-MM') : ''
-        }
+        
+        
       })
     }
-    console.log(values, moment)
+    console.log(values)
   }
   onSearch = () => {
     this.formRef.submit();
@@ -63,11 +74,10 @@ class TableFilter extends React.Component {
     const fieldsData = columns.map((col) => {
       return {
         name: col.name,
-        value: col.initialValue
+        value: setInitialValue(col.initialValue, col.type)
       }
     })
     console.log(fieldsData)
-    return
     this.formRef.setFields([...fieldsData]);
   }
   renderCol = (col) => {
@@ -88,7 +98,6 @@ class TableFilter extends React.Component {
     //这里删除的属性都是Form.Item不需要的或者不识别的属性
     delete itemOption.placeHolder
     delete itemOption.selectOptions
-    delete itemOption.pickerType
     let resultCol;
     if (type === 'input') {
       resultCol = <Form.Item
@@ -115,6 +124,21 @@ class TableFilter extends React.Component {
         <DatePicker  />
       </Form.Item>
     }
+    if (type === 'datePickerWeek') {
+      resultCol = <Form.Item
+        {...itemOption}
+      >
+        <DatePicker picker="week" />
+      </Form.Item>
+    }
+
+    if (type === 'datePickerYear') {
+      resultCol = <Form.Item
+        {...itemOption}
+      >
+        <DatePicker picker="year" />
+      </Form.Item>
+    }
     if (type === 'datePickerMonth') {
       resultCol = <Form.Item
         {...itemOption}
@@ -122,7 +146,13 @@ class TableFilter extends React.Component {
         <DatePicker picker="month" />
       </Form.Item>
     }
-    
+    if (type === 'datePickerQuarter') {
+      resultCol = <Form.Item
+        {...itemOption}
+      >
+        <DatePicker picker="quarter" />
+      </Form.Item>
+    }
     return resultCol
   }
   render() {
